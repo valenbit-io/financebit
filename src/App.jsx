@@ -260,10 +260,27 @@ function App() {
       </main>
 
       {!isSearching && !loading && !error && (
-         <div className="w-full max-w-7xl z-10 px-4 pb-12 flex justify-between items-center mx-auto mt-auto">
-            <button onClick={() => setPage(prev => Math.max(prev - 1, 1))} disabled={page === 1} className={`px-6 py-3 rounded-xl font-bold transition-all border ${page === 1 ? 'bg-slate-200 dark:bg-gray-800/50 text-slate-400 dark:text-gray-600 border-transparent cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-slate-700 dark:text-white border-slate-200 dark:border-white/10 hover:border-blue-500 dark:hover:border-cyan-500/50'}`}>← Anterior</button>
-            <span className="text-slate-500 dark:text-gray-400 font-mono text-sm bg-white/50 dark:bg-gray-900/50 px-6 py-3 rounded-xl border border-slate-200 dark:border-white/5">Página <span className="text-blue-600 dark:text-cyan-400 font-bold ml-2">{page}</span></span>
-            <button onClick={() => setPage(prev => prev + 1)} className="px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-blue-600 hover:brightness-110 text-white shadow-lg shadow-blue-500/20 transition-all">Siguiente →</button>
+         <div className="w-full max-w-7xl z-10 px-4 pb-12 flex flex-col md:flex-row justify-between items-center gap-4 mx-auto mt-auto">
+            
+            <button 
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))} 
+              disabled={page === 1} 
+              className={`w-full md:w-auto px-6 py-3 rounded-xl font-bold transition-all border text-sm ${page === 1 ? 'bg-slate-200 dark:bg-gray-800/50 text-slate-400 dark:text-gray-600 border-transparent cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-slate-700 dark:text-white border-slate-200 dark:border-white/10 hover:border-blue-500 dark:hover:border-cyan-500/50'}`}
+            >
+              ← Anterior
+            </button>
+            
+            <span className="text-slate-500 dark:text-gray-400 font-mono text-sm bg-white/50 dark:bg-gray-900/50 px-6 py-3 rounded-xl border border-slate-200 dark:border-white/5 whitespace-nowrap">
+              Página <span className="text-blue-600 dark:text-cyan-400 font-bold ml-2">{page}</span>
+            </span>
+            
+            <button 
+              onClick={() => setPage(prev => prev + 1)} 
+              className="w-full md:w-auto px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-blue-600 hover:brightness-110 text-white text-sm shadow-lg shadow-blue-500/20 transition-all"
+            >
+              Siguiente →
+            </button>
+         
          </div>
       )}
 

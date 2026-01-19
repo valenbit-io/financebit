@@ -1,5 +1,6 @@
-import React from 'react';
-import TrendingTicker from './TrendingTicker';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import logoImg from '../assets/logo.png'; 
 
 const Header = ({ 
   trending, 
@@ -8,98 +9,111 @@ const Header = ({
   darkMode, 
   setDarkMode, 
   currency, 
-  setCurrency, 
-  watchlist, 
-  showFavorites, 
-  setShowFavorites, 
+  setCurrency,
+  watchlist,
+  showFavorites,
+  setShowFavorites,
   setSearchTerm, 
-  handleSearch, 
-  isSearching, 
+  handleSearch,
+  isSearching,
   clearSearch,
-  searchTerm 
+  searchTerm
 }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="fixed top-0 left-0 w-full z-40 bg-white/80 dark:bg-[#0f172a]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg dark:shadow-2xl transition-all duration-300">
-      
-      {trending.length > 0 && (
-        <TrendingTicker trending={trending} onCoinClick={handleTickerClick} />
-      )}
-
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          
-          <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-start">
-            
-            <h1 
-              className="text-3xl font-extrabold cursor-pointer tracking-tight hover:opacity-80 transition-opacity flex items-center" 
-              onClick={handleReset}
-            >
-              <span className="text-slate-800 dark:text-white mr-0.5">Finance</span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-400 dark:to-blue-500">Bit</span>
-            </h1>
-            
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setDarkMode(!darkMode)}
-                className="bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-yellow-400 p-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                {darkMode ? '☀️' : '🌙'}
-              </button>
-
-              <select 
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="bg-slate-100 dark:bg-gray-800/50 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 outline-none block p-2.5 font-bold cursor-pointer hover:bg-slate-200 dark:hover:bg-gray-800 transition-colors"
-              >
-                <option value="usd">USD</option>
-                <option value="mxn">MXN</option>
-                <option value="eur">EUR</option>
-              </select>
-
-              <button
-                onClick={() => {
-                  setShowFavorites(!showFavorites);
-                  setSearchTerm(""); 
-                }}
-                className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 border ${
-                  showFavorites 
-                  ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/50' 
-                  : 'bg-slate-100 dark:bg-gray-800/50 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-white/10 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-gray-800'
-                }`}
-              >
-                ★ <span className="hidden sm:inline">{showFavorites ? 'Ver Todos' : 'Favoritos'}</span>
-                <span className="bg-white dark:bg-gray-900 px-2 rounded-full text-xs py-0.5 ml-1 border border-slate-200 dark:border-white/10">
-                  {watchlist.length}
-                </span>
-              </button>
+    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}>
+      <div className="max-w-7xl mx-auto px-4">
+        {!isSearching && !showFavorites && (
+          <div className="w-full overflow-hidden bg-blue-50/50 dark:bg-blue-900/10 rounded-lg mb-2 border border-blue-100 dark:border-blue-500/10">
+            <div className="animate-marquee whitespace-nowrap py-1 flex gap-8 items-center">
+               <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest px-4">🔥 Tendencias:</span>
+               {trending.map(coin => (
+                 <button key={coin.item.id} onClick={() => handleTickerClick(coin.item.id)} className="inline-flex items-center gap-2 group cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 px-3 rounded-full transition-all">
+                    <img src={coin.item.thumb} alt={coin.item.name} className="w-5 h-5 rounded-full" />
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-cyan-400">{coin.item.symbol}</span>
+                    <span className={`text-xs ${coin.item.data.price_change_percentage_24h.usd > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {coin.item.data.price_change_percentage_24h.usd.toFixed(2)}%
+                    </span>
+                 </button>
+               ))}
             </div>
           </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
           
-          <form onSubmit={handleSearch} className="w-full md:w-96 flex gap-2">
-            <div className="relative w-full">
+          <Link to="/" onClick={handleReset} className="flex items-center gap-2 group shrink-0">
+            <img 
+              src={logoImg} 
+              alt="FinanceBit" 
+              className="w-8 h-8 md:w-10 md:h-10 object-contain transition-transform group-hover:scale-110" 
+            />
+            <h1 className="text-lg md:text-2xl font-black tracking-tighter text-slate-800 dark:text-white hidden sm:block">
+              Finance<span className="text-blue-600 dark:text-cyan-400">Bit</span>
+            </h1>
+          </Link>
+
+          <div className="flex-1 max-w-md relative">
+            <form onSubmit={handleSearch} className="relative group">
               <input 
-                type="text"
-                placeholder="Buscar token..."
+                type="text" 
+                placeholder="Buscar (ej. Bitcoin)..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-100 dark:bg-gray-900/50 border border-slate-200 dark:border-white/10 rounded-xl pl-4 pr-10 py-2.5 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 transition-all placeholder-gray-400 dark:placeholder-gray-500 text-sm md:text-base"
+                className="w-full bg-slate-100 dark:bg-slate-800/50 text-slate-800 dark:text-white rounded-full pl-10 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all border border-transparent focus:bg-white dark:focus:bg-slate-800"
               />
-              
-              {isSearching && (
-                <button 
-                  type="button" 
-                  onClick={clearSearch} 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-slate-600 dark:hover:text-white font-bold p-1 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
-                >
-                  ✕
-                </button>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+              {searchTerm && (
+                <button type="button" onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500">✕</button>
               )}
-            </div>
+            </form>
+          </div>
 
-            <button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-blue-600 hover:brightness-110 px-6 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 text-white text-sm md:text-base">
-              Buscar
+          <div className="flex items-center gap-2 md:gap-3 shrink-0">
+            
+            <select 
+              value={currency} 
+              onChange={(e) => setCurrency(e.target.value)} 
+              className="bg-slate-100 dark:bg-slate-800 text-xs md:text-sm font-bold text-slate-700 dark:text-white rounded-lg px-2 py-2 md:px-3 md:py-2 outline-none border border-transparent hover:border-slate-300 dark:hover:border-slate-600 cursor-pointer"
+            >
+              <option value="usd">USD</option>
+              <option value="mxn">MXN</option>
+              <option value="eur">EUR</option>
+            </select>
+            <button 
+              onClick={() => setShowFavorites(!showFavorites)} 
+              className={`relative p-2 md:px-4 md:py-2 rounded-lg flex items-center gap-2 transition-all font-bold border ${
+                showFavorites 
+                ? 'bg-yellow-100 border-yellow-300 text-yellow-700' 
+                : 'bg-slate-100 dark:bg-slate-800 border-transparent text-slate-500 dark:text-slate-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600'
+              }`}
+            >
+              <span className="text-lg">★</span>
+              <span className="hidden md:block text-sm">Favoritos</span>
+              {watchlist.length > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] text-white font-bold animate-bounce">
+                  {watchlist.length}
+                </span>
+              )}
             </button>
-          </form>
+
+            <button 
+              onClick={() => setDarkMode(!darkMode)} 
+              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-yellow-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            >
+              {darkMode ? '☀️' : '🌙'}
+            </button>
+
+          </div>
         </div>
       </div>
     </header>

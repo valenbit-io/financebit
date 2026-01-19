@@ -250,15 +250,23 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
           </div>
 
           <div className="lg:col-span-2 flex flex-col h-[500px] bg-slate-50 dark:bg-gray-900/50 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-white/5">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-slate-500 dark:text-gray-400 font-bold">Historial de Precio</h3>
-              <div className="flex gap-1 bg-white dark:bg-gray-800 p-1 rounded-lg border border-slate-200 dark:border-transparent">
-                 {[1, 7, 30, 365].map((d) => (
-                   <button key={d} onClick={() => setDays(d)} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${days === d ? 'bg-blue-600 dark:bg-cyan-600 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700'}`}>{d === 1 ? '24H' : d === 365 ? '1A' : `${d}D`}</button>
-                 ))}
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-slate-500 dark:text-gray-400 font-bold text-sm md:text-base">Historial de Precio</h3>
+                
+                <div className="flex gap-1 bg-white dark:bg-gray-800 p-1 rounded-lg border border-slate-200 dark:border-transparent overflow-x-auto max-w-[200px] md:max-w-none scrollbar-hide">
+                   {[1, 7, 30, 365].map((d) => (
+                     <button 
+                        key={d} 
+                        onClick={() => setDays(d)} 
+                        className={`whitespace-nowrap px-3 py-1 md:px-4 md:py-1.5 rounded-md text-xs md:text-sm font-bold transition-all ${days === d ? 'bg-blue-600 dark:bg-cyan-600 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700'}`}
+                      >
+                        {d === 1 ? '24H' : d === 365 ? '1A' : `${d}D`}
+                      </button>
+                   ))}
+                </div>
+
               </div>
-            </div>
-            <div className="flex-1 w-full relative">
+              <div className="flex-1 w-full relative">
               {chartLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center"><div className="w-10 h-10 border-4 border-blue-500 dark:border-cyan-500 border-t-transparent rounded-full animate-spin"></div></div>
               ) : chartData.length > 0 ? (
