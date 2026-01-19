@@ -11,7 +11,6 @@ const FavoritesModal = ({
   const [favCoins, setFavCoins] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar datos de las monedas favoritas
   useEffect(() => {
     const fetchFavorites = async () => {
       if (watchlist.length === 0) {
@@ -22,7 +21,6 @@ const FavoritesModal = ({
 
       setLoading(true);
       try {
-        // Pedimos solo las monedas que están en la watchlist
         const res = await fetch(
           `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${watchlist.join(',')}&order=market_cap_desc`
         );
@@ -38,7 +36,6 @@ const FavoritesModal = ({
     fetchFavorites();
   }, [watchlist, currency]);
 
-  // Cerrar al hacer clic fuera
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };

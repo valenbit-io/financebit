@@ -22,7 +22,7 @@ const TrendingTicker = ({ trending, onCoinClick }) => {
             )}
           </div>
         ))}
-        {/* Duplicado para efecto infinito */}
+        
         {trending.map((coin) => (
           <div 
             key={`${coin.item.id}-dup`} 

@@ -4,23 +4,23 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './pages/Home';
 import CoinPage from './pages/CoinPage';
-import FavoritesModal from './components/FavoritesModal'; // ✨ IMPORTAMOS EL NUEVO MODAL
+import FavoritesModal from './components/FavoritesModal';
 
 function App() {
+  const navigate = useNavigate();
+  
   const [coins, setCoins] = useState([]);
+  const [heroCoins, setHeroCoins] = useState([]);
+  const [trending, setTrending] = useState([]);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [currency, setCurrency] = useState('usd');
-  const [heroCoins, setHeroCoins] = useState([]);
-  const [trending, setTrending] = useState([]);
-  
-  // Este estado ahora controla si el MODAL está abierto o cerrado
   const [showFavorites, setShowFavorites] = useState(false);
-
-  const navigate = useNavigate();
 
   const [darkMode, setDarkMode] = useState(() => {
     if (localStorage.getItem('theme')) {
@@ -67,7 +67,7 @@ function App() {
         setTrending(data.coins);
         localStorage.setItem(cacheKey, JSON.stringify({ data: data.coins, timestamp: Date.now() }));
       } catch (e) {
-        console.error("Error cargando tendencias", e);
+        console.error(e);
       }
     };
     fetchTrending();
@@ -85,46 +85,13 @@ function App() {
     }
   }, [coins]);
 
-  const handleReset = () => {
-    setSearchTerm("");
-    setIsSearching(false);
-    setShowFavorites(false); // Cierra modal si estaba abierto
-    setPage(1);
-    setError(null);
-    setLoading(true);
-    fetchData(currency, 1, ""); 
-    navigate("/"); 
-  };
-
-  const toggleWatchlist = (e, coinId) => {
-    e.stopPropagation(); 
-    setWatchlist(prev => {
-      if (prev.includes(coinId)) {
-        return prev.filter(id => id !== coinId); 
-      } else {
-        return [...prev, coinId]; 
-      }
-    });
-  };
-
-  const formatPrice = (price) => {
-    if (!price) return "N/A";
-    return new Intl.NumberFormat(currency === 'mxn' ? 'es-MX' : 'en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-      minimumFractionDigits: 2,
-    }).format(price);
-  };
-
-  // ✨ FETCH SIMPLIFICADO: Ya no maneja favoritos, solo lista principal y búsqueda
   const fetchData = useCallback(async (currCurrency = currency, currPage = page, term = searchTerm) => {
     setLoading(true);
     setError(null);
 
-    // Quitamos 'watchlist' del cacheKey de la lista principal para evitar recargas innecesarias
     const cacheKey = `coins_${currCurrency}_${currPage}_${term}`;
-    
     const cached = localStorage.getItem(cacheKey);
+
     if (cached && !term) { 
       const { data, timestamp } = JSON.parse(cached);
       if (Date.now() - timestamp < 2 * 60 * 1000) {
@@ -149,16 +116,14 @@ function App() {
           setLoading(false);
           return;
         }
-      } 
-      else {
+      } else {
         setIsSearching(false);
         url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currCurrency}&order=market_cap_desc&per_page=10&page=${currPage}&sparkline=true`;
       }
 
       const res = await fetch(url);
-      
-      if (res.status === 429) throw new Error("⚠️ Límite de API excedido. Espera unos segundos.");
-      if (!res.ok) throw new Error("Error al conectar con el servidor.");
+      if (res.status === 429) throw new Error("Rate limit exceeded. Please wait.");
+      if (!res.ok) throw new Error("Server error.");
       
       const data = await res.json();
       setCoins(data);
@@ -166,7 +131,6 @@ function App() {
       if (!term) {
         localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
       }
-
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -189,6 +153,34 @@ function App() {
     return () => clearTimeout(timer);
   }, [fetchData, currency, page, searchTerm]);
 
+  const handleReset = () => {
+    setSearchTerm("");
+    setIsSearching(false);
+    setShowFavorites(false);
+    setPage(1);
+    setError(null);
+    setLoading(true);
+    fetchData(currency, 1, ""); 
+    navigate("/"); 
+  };
+
+  const toggleWatchlist = (e, coinId) => {
+    e.stopPropagation(); 
+    setWatchlist(prev => {
+      if (prev.includes(coinId)) return prev.filter(id => id !== coinId); 
+      return [...prev, coinId]; 
+    });
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return "N/A";
+    return new Intl.NumberFormat(currency === 'mxn' ? 'es-MX' : 'en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 2,
+    }).format(price);
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     fetchData(currency, 1, searchTerm);
@@ -210,7 +202,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-white font-sans flex flex-col items-center relative overflow-x-hidden transition-colors duration-300">
-      
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/20 dark:bg-blue-600/20 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-[120px]"></div>
@@ -230,7 +221,6 @@ function App() {
         }}
         watchlist={watchlist}
         showFavorites={showFavorites}
-        // ✨ AHORA SOLO TOGGLEA EL ESTADO, NO NAVEGA
         setShowFavorites={setShowFavorites}
         setSearchTerm={setSearchTerm}
         handleSearch={handleSearch}
@@ -257,7 +247,6 @@ function App() {
               isSearching={isSearching}
             />
           } />
-
           <Route path="/coin/:id" element={
             <CoinPage 
               formatPrice={formatPrice}
@@ -278,7 +267,6 @@ function App() {
          </div>
       )}
 
-      {/* ✨ RENDERIZAMOS EL MODAL SI showFavorites es TRUE */}
       {showFavorites && (
         <FavoritesModal 
           watchlist={watchlist}
@@ -291,7 +279,6 @@ function App() {
           }}
         />
       )}
-
     </div>
   );
 }

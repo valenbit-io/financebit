@@ -9,12 +9,10 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
   const [coin, setCoin] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // --- ESTADOS DE LA CALCULADORA PRO ---
   const [amount, setAmount] = useState(100); 
   const [targetPrice, setTargetPrice] = useState(0); 
   const [currentPrice, setCurrentPrice] = useState(0); 
   
-  // Estados para controlar el foco de los inputs (para las comas)
   const [isAmountFocused, setIsAmountFocused] = useState(false);
   const [isTargetFocused, setIsTargetFocused] = useState(false);
   
@@ -22,7 +20,6 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
   const [days, setDays] = useState(7); 
   const [chartLoading, setChartLoading] = useState(true);
 
-  // Función inteligente para calcular objetivo inicial
   const calculateSmartTarget = (price) => {
     const rawTarget = price * 1.5; 
     let decimals = 2;
@@ -31,9 +28,8 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
     return parseFloat(rawTarget.toFixed(decimals));
   };
 
-  // Helper para mostrar comas cuando NO estamos editando
   const formatInputDisplay = (val, isFocused) => {
-    if (isFocused) return val; // Si escribimos, muestra el valor crudo
+    if (isFocused) return val;
     if (!val && val !== 0) return "";
     return new Intl.NumberFormat('en-US', { 
       maximumFractionDigits: 8,
@@ -41,25 +37,17 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
     }).format(val);
   };
 
-  // Helper para limpiar y VALIDAR el input
   const handleInputChange = (val, setter) => {
-    // Permitir borrar todo
     if (val === "") {
       setter("");
       return;
     }
-    // Quitamos comas para obtener el número puro
     const cleanVal = val.replace(/,/g, '');
-    
-    // VALIDACIÓN:
-    // 1. Que sea un número (!isNaN)
-    // 2. Que no tenga más de 12 dígitos (cleanVal.length <= 12)
     if (!isNaN(cleanVal) && cleanVal.length <= 12) {
       setter(cleanVal);
     }
   };
 
-  // Fetch de datos principales
   useEffect(() => {
     const fetchCoinData = async () => {
       setLoading(true);
@@ -91,7 +79,7 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
           navigate('/');
         }
       } catch (error) {
-        console.error("Error fetching coin:", error);
+        console.error(error);
         if (cached) {
             const { data } = JSON.parse(cached);
             setCoin(data);
@@ -105,7 +93,6 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
     fetchCoinData();
   }, [id, currency, navigate]);
 
-  // Fetch del Gráfico
   useEffect(() => {
     const fetchChartData = async () => {
       setChartLoading(true);
@@ -128,7 +115,7 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
         const formattedData = data.prices.map((item) => ({ date: item[0], price: item[1] }));
         setChartData(formattedData);
         localStorage.setItem(cacheKey, JSON.stringify({ data: formattedData, timestamp: Date.now() }));
-      } catch (error) { console.error("Error chart data:", error); } 
+      } catch (error) { console.error(error); } 
       finally { setChartLoading(false); }
     };
     fetchChartData();
@@ -142,14 +129,11 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
     );
   }
 
-  // --- LÓGICA MATEMÁTICA ---
   const numericAmount = Number(amount);
   const numericTarget = Number(targetPrice);
-  
   const coinsOwned = numericAmount / currentPrice; 
   const futureValue = coinsOwned * numericTarget; 
   const profit = futureValue - numericAmount; 
-  
   const percentageGrowth = currentPrice > 0 
     ? ((numericTarget - currentPrice) / currentPrice) * 100 
     : 0;
@@ -170,8 +154,7 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 pt-0 pb-12 animate-fadeIn">
-      
+    <div className="w-full max-w-7xl mx-auto px-4 pt-48 md:pt-40 pb-12 animate-fadeIn">
       <button 
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center gap-2 text-slate-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-cyan-400 transition-colors font-bold"
@@ -180,8 +163,6 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
       </button>
 
       <div className="bg-white/70 dark:bg-gray-800/40 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden p-6 md:p-8 transition-colors duration-300">
-        
-        {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-200 dark:border-white/5 pb-6">
           <div className="flex items-center gap-4">
             <img src={coin.image} alt={coin.name} className="w-16 h-16 rounded-full shadow-lg" />
@@ -213,8 +194,6 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* COLUMNA IZQUIERDA: ESTADÍSTICAS + CALCULADORA */}
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <StatCard label="Rango 24h (Bajo)" value={formatCompact(coin.low_24h)} color="text-rose-600 dark:text-rose-300" />
@@ -223,13 +202,9 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
               <StatCard label="Volumen Total" value={formatCompact(coin.total_volume)} />
             </div>
 
-            {/* CALCULADORA DE PROYECCIÓN */}
             <div className="bg-slate-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-slate-200 dark:border-white/5 shadow-inner">
               <h3 className="text-blue-600 dark:text-cyan-400 font-bold mb-4 uppercase flex items-center gap-2">🚀 Simulador de Ganancias</h3>
-              
               <div className="space-y-4">
-                
-                {/* Input 1: Cuánto invierto */}
                 <div>
                   <label className="text-xs text-slate-500 dark:text-gray-400 mb-1 block">Si invierto hoy ({currency.toUpperCase()}):</label>
                   <input 
@@ -241,8 +216,6 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
                     className="w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl p-3 text-slate-800 dark:text-white font-mono focus:ring-2 focus:ring-blue-500 outline-none" 
                   />
                 </div>
-
-                {/* Input 2: Precio Objetivo */}
                 <div>
                   <label className="text-xs text-slate-500 dark:text-gray-400 mb-1 block flex justify-between">
                     <span>Y el precio sube a:</span>
@@ -259,10 +232,7 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
                     className="w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-xl p-3 text-slate-800 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 outline-none" 
                   />
                 </div>
-
                 <div className="border-t border-slate-200 dark:border-white/10 my-2"></div>
-
-                {/* Resultados */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-slate-100 dark:border-white/5">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs text-slate-500 dark:text-gray-400">Valor Futuro:</span>
@@ -275,12 +245,10 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
                     </span>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: GRÁFICO */}
           <div className="lg:col-span-2 flex flex-col h-[500px] bg-slate-50 dark:bg-gray-900/50 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-white/5">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-slate-500 dark:text-gray-400 font-bold">Historial de Precio</h3>
@@ -298,7 +266,6 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
               ) : ( <div className="h-full flex items-center justify-center text-slate-400">Sin datos</div> )}
             </div>
           </div>
-
         </div>
       </div>
     </div>

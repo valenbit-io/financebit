@@ -21,7 +21,6 @@ const Header = ({
   return (
     <header className="fixed top-0 left-0 w-full z-40 bg-white/80 dark:bg-[#0f172a]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg dark:shadow-2xl transition-all duration-300">
       
-      {/* Usamos el componente Ticker que acabamos de crear */}
       {trending.length > 0 && (
         <TrendingTicker trending={trending} onCoinClick={handleTickerClick} />
       )}
