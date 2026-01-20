@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Home from './pages/Home';
 import CoinPage from './pages/CoinPage';
 import FavoritesModal from './components/FavoritesModal';
+import { useCache } from './hooks/useCache';
 
 function App() {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [currency, setCurrency] = useState('usd');
   const [showFavorites, setShowFavorites] = useState(false);
+
+  const { getCache, setCache } = useCache();
 
   const [darkMode, setDarkMode] = useState(() => {
     if (localStorage.getItem('theme')) {
@@ -53,13 +56,10 @@ function App() {
   useEffect(() => {
     const fetchTrending = async () => {
       const cacheKey = 'trending_coins';
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < 15 * 60 * 1000) {
-          setTrending(data);
-          return;
-        }
+      const cachedData = getCache(cacheKey, 15);
+      if (cachedData) {
+        setTrending(cachedData);
+        return;
       }
 
       try {
@@ -67,26 +67,23 @@ function App() {
         if (!res.ok) return;
         const data = await res.json();
         setTrending(data.coins);
-        localStorage.setItem(cacheKey, JSON.stringify({ data: data.coins, timestamp: Date.now() }));
+        setCache(cacheKey, data.coins);
       } catch (e) {
         console.error(e);
       }
     };
     fetchTrending();
-  }, []);
+  }, [getCache, setCache]);
 
   // 👇 LOGICA DE EQUILIBRIO VISUAL (Intercalado Verde/Rojo)
   useEffect(() => {
     const fetchTickerData = async () => {
       const cacheKey = `ticker_top_100_balanced_${currency}`;
-      const cached = localStorage.getItem(cacheKey);
+      const cachedData = getCache(cacheKey, 5);
       
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < 5 * 60 * 1000) {
-          setTickerCoins(data);
-          return;
-        }
+      if (cachedData) {
+        setTickerCoins(cachedData);
+        return;
       }
 
       try {
@@ -109,13 +106,13 @@ function App() {
         // --- FIN ALGORITMO ---
 
         setTickerCoins(balancedList);
-        localStorage.setItem(cacheKey, JSON.stringify({ data: balancedList, timestamp: Date.now() }));
+        setCache(cacheKey, balancedList);
       } catch (e) {
         console.error("Error cargando ticker:", e);
       }
     };
     fetchTickerData();
-  }, [currency]);
+  }, [currency, getCache, setCache]);
 
   // Hero Logic
   useEffect(() => {
@@ -136,12 +133,11 @@ function App() {
     setError(null);
 
     const cacheKey = `coins_${currCurrency}_${currPage}_${term}`;
-    const cached = localStorage.getItem(cacheKey);
 
-    if (cached && !term) { 
-      const { data, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < 2 * 60 * 1000) {
-        setCoins(data);
+    if (!term) {
+      const cachedData = getCache(cacheKey, 2);
+      if (cachedData) {
+        setCoins(cachedData);
         setLoading(false);
         return;
       }
@@ -175,14 +171,14 @@ function App() {
       setCoins(data);
 
       if (!term) {
-        localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+        setCache(cacheKey, data);
       }
     } catch (err) {
       console.error(err);
       setError(err.message);
-      if (cached) {
-        const { data } = JSON.parse(cached);
-        setCoins(data);
+      const staleData = getCache(cacheKey);
+      if (staleData) {
+        setCoins(staleData);
         setError(null); 
       } else {
         setCoins([]);
@@ -190,7 +186,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [currency, page, searchTerm]); 
+  }, [currency, page, searchTerm, getCache, setCache]); 
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useCache } from '../hooks/useCache';
 
 const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode }) => {
   const { id } = useParams(); 
@@ -19,6 +20,8 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
   const [chartData, setChartData] = useState([]);
   const [days, setDays] = useState(7); 
   const [chartLoading, setChartLoading] = useState(true);
+
+  const { getCache, setCache } = useCache();
 
   const calculateSmartTarget = (price) => {
     const rawTarget = price * 1.5; 
@@ -53,16 +56,13 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
       setLoading(true);
       const cacheKey = `coin_detail_${id}_${currency}`;
       
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < 5 * 60 * 1000) {
-          setCoin(data);
-          setCurrentPrice(data.current_price);
-          setTargetPrice(calculateSmartTarget(data.current_price)); 
-          setLoading(false);
-          return;
-        }
+      const cachedData = getCache(cacheKey, 5);
+      if (cachedData) {
+        setCoin(cachedData);
+        setCurrentPrice(cachedData.current_price);
+        setTargetPrice(calculateSmartTarget(cachedData.current_price)); 
+        setLoading(false);
+        return;
       }
 
       try {
@@ -74,38 +74,35 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
           setCoin(data[0]);
           setCurrentPrice(data[0].current_price);
           setTargetPrice(calculateSmartTarget(data[0].current_price)); 
-          localStorage.setItem(cacheKey, JSON.stringify({ data: data[0], timestamp: Date.now() }));
+          setCache(cacheKey, data[0]);
         } else {
           navigate('/');
         }
       } catch (error) {
         console.error(error);
-        if (cached) {
-            const { data } = JSON.parse(cached);
-            setCoin(data);
-            setCurrentPrice(data.current_price);
-            setTargetPrice(calculateSmartTarget(data.current_price));
+        const staleData = getCache(cacheKey);
+        if (staleData) {
+            setCoin(staleData);
+            setCurrentPrice(staleData.current_price);
+            setTargetPrice(calculateSmartTarget(staleData.current_price));
         }
       } finally {
         setLoading(false);
       }
     };
     fetchCoinData();
-  }, [id, currency, navigate]);
+  }, [id, currency, navigate, getCache, setCache]);
 
   useEffect(() => {
     const fetchChartData = async () => {
       setChartLoading(true);
       const cacheKey = `coin_chart_${id}_${currency}_${days}`;
 
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < 10 * 60 * 1000) {
-            setChartData(data);
-            setChartLoading(false);
-            return;
-        }
+      const cachedData = getCache(cacheKey, 10);
+      if (cachedData) {
+          setChartData(cachedData);
+          setChartLoading(false);
+          return;
       }
 
       try {
@@ -114,12 +111,12 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
         const data = await res.json();
         const formattedData = data.prices.map((item) => ({ date: item[0], price: item[1] }));
         setChartData(formattedData);
-        localStorage.setItem(cacheKey, JSON.stringify({ data: formattedData, timestamp: Date.now() }));
+        setCache(cacheKey, formattedData);
       } catch (error) { console.error(error); } 
       finally { setChartLoading(false); }
     };
     fetchChartData();
-  }, [id, days, currency]);
+  }, [id, days, currency, getCache, setCache]);
 
   if (loading || !coin) {
     return (

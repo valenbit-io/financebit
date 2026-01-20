@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useCache } from '../hooks/useCache';
 
 const FavoritesModal = ({ 
   watchlist, 
@@ -11,6 +12,8 @@ const FavoritesModal = ({
   const [favCoins, setFavCoins] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { getCache, setCache } = useCache();
+
   useEffect(() => {
     const fetchFavorites = async () => {
       if (watchlist.length === 0) {
@@ -22,15 +25,12 @@ const FavoritesModal = ({
       setLoading(true);
       
       const cacheKey = `fav_coins_${currency}_${watchlist.sort().join('_')}`;
-      const cached = localStorage.getItem(cacheKey);
+      const cachedData = getCache(cacheKey, 2);
 
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < 2 * 60 * 1000) { // 2 minutes cache
-          setFavCoins(data);
-          setLoading(false);
-          return;
-        }
+      if (cachedData) {
+        setFavCoins(cachedData);
+        setLoading(false);
+        return;
       }
 
       try {
@@ -39,11 +39,12 @@ const FavoritesModal = ({
         );
         const data = await res.json();
         setFavCoins(data);
-        localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+        setCache(cacheKey, data);
       } catch (error) {
         console.error("Error cargando favoritos", error);
-        if (cached) {
-          setFavCoins(JSON.parse(cached).data);
+        const staleData = getCache(cacheKey);
+        if (staleData) {
+          setFavCoins(staleData);
         }
       } finally {
         setLoading(false);
@@ -51,7 +52,7 @@ const FavoritesModal = ({
     };
 
     fetchFavorites();
-  }, [watchlist, currency]);
+  }, [watchlist, currency, getCache, setCache]);
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
