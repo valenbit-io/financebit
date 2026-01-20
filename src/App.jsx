@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 import Header from './components/Header';
@@ -10,6 +10,7 @@ import { useCache } from './hooks/useCache';
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const abortControllerRef = useRef(null);
   
   const [coins, setCoins] = useState([]);
   const [tickerCoins, setTickerCoins] = useState([]); 
@@ -130,6 +131,15 @@ function App() {
 
   // Main Table Fetch
   const fetchData = useCallback(async (currCurrency = currency, currPage = page, term = searchTerm) => {
+    // 1. Cancelar petición anterior si existe para evitar conflictos
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    // 2. Crear nuevo controlador para la petición actual
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const signal = controller.signal;
+
     setLoading(true);
     setError(null);
 
@@ -148,7 +158,7 @@ function App() {
       let url = "";
       if (term) {
         setIsSearching(true);
-        const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${term}`);
+        const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${term}`, { signal });
         const searchData = await searchRes.json();
         const coinIds = searchData.coins.slice(0, 10).map(coin => coin.id).join(',');
         
@@ -164,7 +174,7 @@ function App() {
         url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currCurrency}&order=market_cap_desc&per_page=10&page=${currPage}&sparkline=true`;
       }
 
-      const res = await fetch(url);
+      const res = await fetch(url, { signal });
       if (res.status === 429) throw new Error("Rate limit exceeded. Please wait.");
       if (!res.ok) throw new Error("Server error.");
       
@@ -175,6 +185,7 @@ function App() {
         setCache(cacheKey, data);
       }
     } catch (err) {
+      if (err.name === 'AbortError') return; // Ignorar errores por cancelación manual
       console.error(err);
       setError(err.message);
       const staleData = getCache(cacheKey);
@@ -185,7 +196,10 @@ function App() {
         setCoins([]);
       }
     } finally {
-      setLoading(false);
+      // Solo quitamos el loading si esta petición NO fue abortada
+      if (!signal.aborted) {
+        setLoading(false);
+      }
     }
   }, [currency, page, searchTerm, getCache, setCache]); 
 
