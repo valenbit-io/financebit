@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import logoImg from '../assets/logo.png'; 
 
 const Header = ({ 
   trending, 
@@ -33,16 +32,17 @@ const Header = ({
     <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}>
       <div className="max-w-7xl mx-auto px-4">
         
-        {/* Ticker de Tendencias (Marquee) */}
+        {/* Ticker de Tendencias (Diseño Limpio) */}
         {!isSearching && !showFavorites && (
-          <div className="w-full overflow-hidden bg-blue-50/50 dark:bg-blue-900/10 rounded-lg mb-2 border border-blue-100 dark:border-blue-500/10">
-            <div className="animate-marquee whitespace-nowrap py-1 flex gap-8 items-center">
-               <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest px-4">🔥 Tendencias:</span>
+          <div className="w-full overflow-hidden mb-4">
+            <div className="animate-marquee whitespace-nowrap flex gap-8 items-center">
+               {/* Se eliminó la etiqueta "Tendencias" para que solo fluyan las monedas */}
                {trending.map(coin => (
-                 <button key={coin.item.id} onClick={() => handleTickerClick(coin.item.id)} className="inline-flex items-center gap-2 group cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 px-3 rounded-full transition-all">
+                 <button key={coin.item.id} onClick={() => handleTickerClick(coin.item.id)} className="inline-flex items-center gap-2 group cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
                     <img src={coin.item.thumb} alt={coin.item.name} className="w-5 h-5 rounded-full" />
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-cyan-400">{coin.item.symbol}</span>
-                    <span className={`text-xs ${coin.item.data.price_change_percentage_24h.usd > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-cyan-400">{coin.item.symbol}</span>
+                    <span className={`text-xs font-mono ${coin.item.data.price_change_percentage_24h.usd > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {coin.item.data.price_change_percentage_24h.usd > 0 ? '+' : ''}
                       {coin.item.data.price_change_percentage_24h.usd.toFixed(2)}%
                     </span>
                  </button>
@@ -54,14 +54,10 @@ const Header = ({
         {/* Barra Principal */}
         <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
           
-          {/* Logo */}
+          {/* Logo (Modo seguro sin imagen para Vercel) */}
           <Link to="/" onClick={handleReset} className="flex items-center gap-2 group shrink-0">
-            <img 
-              src={logoImg} 
-              alt="FinanceBit" 
-              className="w-8 h-8 md:w-10 md:h-10 object-contain transition-transform group-hover:scale-110" 
-            />
-            <h1 className="text-lg md:text-2xl font-black tracking-tighter text-slate-800 dark:text-white hidden sm:block">
+            <span className="text-2xl md:text-3xl filter drop-shadow-sm group-hover:scale-110 transition-transform">💎</span>
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter text-slate-800 dark:text-white">
               Finance<span className="text-blue-600 dark:text-cyan-400">Bit</span>
             </h1>
           </Link>
@@ -71,7 +67,7 @@ const Header = ({
             <form onSubmit={handleSearch} className="relative group">
               <input 
                 type="text" 
-                placeholder="Buscar (ej. Bitcoin)..." 
+                placeholder="Buscar..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-slate-100 dark:bg-slate-800/50 text-slate-800 dark:text-white rounded-full pl-10 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all border border-transparent focus:bg-white dark:focus:bg-slate-800"
@@ -83,9 +79,8 @@ const Header = ({
             </form>
           </div>
 
-          {/* Controles Derecha (Moneda, Favoritos, Tema) */}
+          {/* Controles Derecha */}
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            
             <select 
               value={currency} 
               onChange={(e) => setCurrency(e.target.value)} 
@@ -96,7 +91,6 @@ const Header = ({
               <option value="eur">EUR</option>
             </select>
 
-            {/* 🔥 CORRECCIÓN AQUÍ: Botón compacto en móvil */}
             <button 
               onClick={() => setShowFavorites(!showFavorites)} 
               className={`relative p-2 md:px-4 md:py-2 rounded-lg flex items-center gap-2 transition-all font-bold border ${
@@ -120,7 +114,6 @@ const Header = ({
             >
               {darkMode ? '☀️' : '🌙'}
             </button>
-
           </div>
         </div>
       </div>
