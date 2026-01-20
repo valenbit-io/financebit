@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
-// 1. Componente externo
 const TickerItems = ({ data, onItemClick }) => (
   <>
     {data.map((coin, index) => {
@@ -13,14 +12,11 @@ const TickerItems = ({ data, onItemClick }) => (
          <button 
             key={`${coin.id}-${index}`} 
             onClick={() => onItemClick(coin.id)} 
-            // 🔥 CAMBIO 1: mr-12 (margen derecho obligatorio) y w-auto para que no se aplaste
             className="flex-shrink-0 w-auto inline-flex items-center gap-2 mr-16 group cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
          >
-            {/* Nombre (text-sm) */}
             <span className="text-slate-700 dark:text-slate-300 font-bold text-sm uppercase tracking-wider whitespace-nowrap">
               {coin.symbol}
             </span>
-            {/* Porcentaje */}
             <span className={`text-sm font-mono font-bold whitespace-nowrap ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
               {change > 0 ? '▲' : '▼'}
               {Math.abs(change).toFixed(2)}%
@@ -67,16 +63,13 @@ const Header = ({
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 flex flex-col ${isScrolled ? 'bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md shadow-lg' : 'bg-white dark:bg-[#0f172a]'}`}>
       
-      {/* 📺 CINTA DE PRECIOS */}
       {!isSearching && !showFavorites && tickerData.length > 0 && (
         <div className="w-full overflow-hidden border-b border-slate-200 dark:border-white/5 py-3 relative z-10 select-none flex group bg-slate-50 dark:bg-black/20">
           
-          {/* 🔥 CAMBIO 2: Quitamos 'min-w-full' y gap del padre. Usamos 'w-max' para que crezca libremente */}
           <div className="animate-marquee whitespace-nowrap flex items-center w-max group-hover:[animation-play-state:paused]">
             <TickerItems data={tickerData} onItemClick={handleTickerClick} />
           </div>
 
-          {/* Clon para bucle infinito */}
           <div className="animate-marquee whitespace-nowrap flex items-center w-max group-hover:[animation-play-state:paused]" aria-hidden="true">
             <TickerItems data={tickerData} onItemClick={handleTickerClick} />
           </div>
@@ -84,11 +77,9 @@ const Header = ({
         </div>
       )}
 
-      {/* BARRA DE NAVEGACIÓN */}
       <div className="w-full max-w-7xl mx-auto px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
           
-          {/* Logo */}
           <Link to="/" onClick={handleReset} className="flex items-center gap-2 group shrink-0">
             <span className="text-2xl md:text-3xl filter drop-shadow-sm group-hover:scale-110 transition-transform">💎</span>
             <h1 className="text-xl md:text-2xl font-black tracking-tighter text-slate-800 dark:text-white">
@@ -96,7 +87,6 @@ const Header = ({
             </h1>
           </Link>
 
-          {/* Buscador */}
           <div className="order-last md:order-none w-full md:w-auto md:flex-1 max-w-md relative mt-2 md:mt-0">
             <form onSubmit={handleSearch} className="relative group">
               <input 
@@ -113,7 +103,6 @@ const Header = ({
             </form>
           </div>
 
-          {/* Controles Derecha */}
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
             <select 
               value={currency} 

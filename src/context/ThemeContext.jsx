@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Inicializar estado basado en localStorage o preferencia del sistema
   const [darkMode, setDarkMode] = useState(() => {
     if (localStorage.getItem('theme')) {
       return localStorage.getItem('theme') === 'dark';
@@ -11,7 +10,6 @@ export const ThemeProvider = ({ children }) => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  // Efecto para aplicar la clase al documento HTML
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');

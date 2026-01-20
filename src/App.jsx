@@ -7,7 +7,6 @@ import CoinPage from './pages/CoinPage';
 import FavoritesModal from './components/FavoritesModal';
 import { useCache } from './hooks/useCache';
 
-// Componente para asegurar que la navegación inicie desde arriba
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -46,7 +45,6 @@ function App() {
     localStorage.setItem('watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
 
-  // Tendencias
   useEffect(() => {
     const fetchTrending = async () => {
       const cacheKey = 'trending_coins';
@@ -69,7 +67,6 @@ function App() {
     fetchTrending();
   }, [getCache, setCache]);
 
-  // 👇 LOGICA DE EQUILIBRIO VISUAL (Intercalado Verde/Rojo)
   useEffect(() => {
     const fetchTickerData = async () => {
       const cacheKey = `ticker_top_100_balanced_${currency}`;
@@ -85,19 +82,16 @@ function App() {
         if (!res.ok) return;
         const data = await res.json();
         
-        // --- INICIO ALGORITMO DE MEZCLA ---
         const greens = data.filter(c => c.price_change_percentage_24h >= 0);
         const reds = data.filter(c => c.price_change_percentage_24h < 0);
         
         const balancedList = [];
         const maxLength = Math.max(greens.length, reds.length);
 
-        // Intercalamos: Una verde, una roja, una verde, una roja...
         for (let i = 0; i < maxLength; i++) {
           if (greens[i]) balancedList.push(greens[i]);
           if (reds[i]) balancedList.push(reds[i]);
         }
-        // --- FIN ALGORITMO ---
 
         setTickerCoins(balancedList);
         setCache(cacheKey, balancedList);
@@ -108,7 +102,6 @@ function App() {
     fetchTickerData();
   }, [currency, getCache, setCache]);
 
-  // Hero Logic
   useEffect(() => {
     if (tickerCoins.length > 0) {
       const shuffleCoins = () => {
@@ -121,13 +114,10 @@ function App() {
     }
   }, [tickerCoins]);
 
-  // Main Table Fetch
   const fetchData = useCallback(async (currCurrency = currency, currPage = page, term = searchTerm) => {
-    // 1. Cancelar petición anterior si existe para evitar conflictos
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    // 2. Crear nuevo controlador para la petición actual
     const controller = new AbortController();
     abortControllerRef.current = controller;
     const signal = controller.signal;
@@ -177,7 +167,7 @@ function App() {
         setCache(cacheKey, data);
       }
     } catch (err) {
-      if (err.name === 'AbortError') return; // Ignorar errores por cancelación manual
+      if (err.name === 'AbortError') return;
       console.error(err);
       setError(err.message);
       const staleData = getCache(cacheKey);
@@ -188,7 +178,6 @@ function App() {
         setCoins([]);
       }
     } finally {
-      // Solo quitamos el loading si esta petición NO fue abortada
       if (!signal.aborted) {
         setLoading(false);
       }
