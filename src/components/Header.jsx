@@ -32,6 +32,8 @@ const Header = ({
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}>
       <div className="max-w-7xl mx-auto px-4">
+        
+        {/* Ticker de Tendencias (Marquee) */}
         {!isSearching && !showFavorites && (
           <div className="w-full overflow-hidden bg-blue-50/50 dark:bg-blue-900/10 rounded-lg mb-2 border border-blue-100 dark:border-blue-500/10">
             <div className="animate-marquee whitespace-nowrap py-1 flex gap-8 items-center">
@@ -49,8 +51,10 @@ const Header = ({
           </div>
         )}
 
+        {/* Barra Principal */}
         <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
           
+          {/* Logo */}
           <Link to="/" onClick={handleReset} className="flex items-center gap-2 group shrink-0">
             <img 
               src={logoImg} 
@@ -62,6 +66,7 @@ const Header = ({
             </h1>
           </Link>
 
+          {/* Buscador */}
           <div className="flex-1 max-w-md relative">
             <form onSubmit={handleSearch} className="relative group">
               <input 
@@ -78,6 +83,7 @@ const Header = ({
             </form>
           </div>
 
+          {/* Controles Derecha (Moneda, Favoritos, Tema) */}
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
             
             <select 
@@ -89,6 +95,8 @@ const Header = ({
               <option value="mxn">MXN</option>
               <option value="eur">EUR</option>
             </select>
+
+            {/* 🔥 CORRECCIÓN AQUÍ: Botón compacto en móvil */}
             <button 
               onClick={() => setShowFavorites(!showFavorites)} 
               className={`relative p-2 md:px-4 md:py-2 rounded-lg flex items-center gap-2 transition-all font-bold border ${
@@ -98,9 +106,7 @@ const Header = ({
               }`}
             >
               <span className="text-lg">★</span>
-              {/* ESTA LÍNEA ES LA CLAVE PARA QUE NO SE SALGA EN MÓVIL */}
               <span className="hidden md:block text-sm">Favoritos</span>
-              
               {watchlist.length > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] text-white font-bold animate-bounce">
                   {watchlist.length}
