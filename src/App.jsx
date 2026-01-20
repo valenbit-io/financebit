@@ -9,12 +9,8 @@ import FavoritesModal from './components/FavoritesModal';
 function App() {
   const navigate = useNavigate();
   
-  // Lista principal para la TABLA (paginada de 10 en 10)
   const [coins, setCoins] = useState([]);
-  
-  // 👇 NUEVO: Lista exclusiva para el HEADER (Top 50 para que haya variedad)
-  const [tickerCoins, setTickerCoins] = useState([]);
-  
+  const [tickerCoins, setTickerCoins] = useState([]); // Lista para el Header
   const [heroCoins, setHeroCoins] = useState([]);
   const [trending, setTrending] = useState([]);
   
@@ -53,7 +49,7 @@ function App() {
     }
   }, [darkMode]);
 
-  // Fetch de Tendencias (backup)
+  // Tendencias
   useEffect(() => {
     const fetchTrending = async () => {
       const cacheKey = 'trending_coins';
@@ -79,11 +75,10 @@ function App() {
     fetchTrending();
   }, []);
 
-  // 👇 NUEVO EFECTO: Descargar Top 50 monedas para la cinta (independiente de la tabla)
+  // 👇 CAMBIO AQUÍ: Pedimos 100 monedas para más variedad y colores
   useEffect(() => {
     const fetchTickerData = async () => {
-      // Usamos caché para no saturar la API (validez 5 minutos)
-      const cacheKey = `ticker_top_50_${currency}`;
+      const cacheKey = `ticker_top_100_${currency}`;
       const cached = localStorage.getItem(cacheKey);
       
       if (cached) {
@@ -95,8 +90,8 @@ function App() {
       }
 
       try {
-        // Pedimos 50 monedas para asegurar mezcla de rojos y verdes
-        const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h`);
+        // per_page=100
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`);
         if (!res.ok) return;
         const data = await res.json();
         setTickerCoins(data);
@@ -108,7 +103,7 @@ function App() {
     fetchTickerData();
   }, [currency]);
 
-  // Lógica del Hero (Monedas destacadas)
+  // Hero Logic
   useEffect(() => {
     if (coins.length > 0) {
       const shuffleCoins = () => {
@@ -121,7 +116,7 @@ function App() {
     }
   }, [coins]);
 
-  // Fetch Principal de la Tabla (Paginado)
+  // Main Table Fetch
   const fetchData = useCallback(async (currCurrency = currency, currPage = page, term = searchTerm) => {
     setLoading(true);
     setError(null);
@@ -155,7 +150,6 @@ function App() {
         }
       } else {
         setIsSearching(false);
-        // Aquí seguimos pidiendo solo 10 para la paginación de la tabla
         url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currCurrency}&order=market_cap_desc&per_page=10&page=${currPage}&sparkline=true`;
       }
 
@@ -247,7 +241,6 @@ function App() {
       </div>
 
       <Header 
-        // 🔥 CAMBIO CLAVE: Pasamos la lista de 50 (tickerCoins) en lugar de la de 10 (coins)
         coins={tickerCoins} 
         trending={trending}
         handleTickerClick={handleTickerClick}
@@ -309,11 +302,9 @@ function App() {
             >
               ← Anterior
             </button>
-            
             <span className="text-slate-500 dark:text-gray-400 font-mono text-sm bg-white/50 dark:bg-gray-900/50 px-6 py-3 rounded-xl border border-slate-200 dark:border-white/5 whitespace-nowrap">
               Página <span className="text-blue-600 dark:text-cyan-400 font-bold ml-2">{page}</span>
             </span>
-            
             <button 
               onClick={() => setPage(prev => prev + 1)} 
               className="w-full md:w-auto px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-blue-600 hover:brightness-110 text-white text-sm shadow-lg shadow-blue-500/20 transition-all"

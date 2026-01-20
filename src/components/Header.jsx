@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// 1. Definimos el componente auxiliar AFUERA para evitar el error de render
+// 1. Componente externo para evitar error de render
 const TickerItems = ({ data, onItemClick }) => (
   <>
     {data.map((coin, index) => {
@@ -12,12 +12,15 @@ const TickerItems = ({ data, onItemClick }) => (
          <button 
             key={`${coin.id}-${index}`} 
             onClick={() => onItemClick(coin.id)} 
-            className="inline-flex items-center gap-2 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity mx-6"
+            // 🔥 CORRECCIÓN: flex-shrink-0 (no aplastar), gap visual grande, texto más grande
+            className="flex-shrink-0 inline-flex items-center gap-2 group cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
          >
-            <span className="text-slate-700 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">
+            {/* Nombre un poco más grande (text-sm) */}
+            <span className="text-slate-700 dark:text-slate-300 font-bold text-sm uppercase tracking-wider">
               {coin.symbol}
             </span>
-            <span className={`text-xs font-mono font-bold ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            {/* Porcentaje más grande (text-sm o text-base) */}
+            <span className={`text-sm font-mono font-bold ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
               {change > 0 ? '▲' : '▼'}
               {Math.abs(change).toFixed(2)}%
             </span>
@@ -55,7 +58,6 @@ const Header = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Preparamos los datos
   const tickerData = coins && coins.length > 0 ? coins : trending.map(t => ({
       id: t.item.id,
       symbol: t.item.symbol,
@@ -65,18 +67,17 @@ const Header = ({
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 flex flex-col ${isScrolled ? 'bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md shadow-lg' : 'bg-white dark:bg-[#0f172a]'}`}>
       
-      {/* 📺 CINTA DE PRECIOS INFINITA (Técnica Twin-Loop) */}
+      {/* 📺 CINTA DE PRECIOS */}
       {!isSearching && !showFavorites && tickerData.length > 0 && (
-        <div className="w-full overflow-hidden border-b border-slate-200 dark:border-white/5 py-2 relative z-10 select-none flex group">
+        <div className="w-full overflow-hidden border-b border-slate-200 dark:border-white/5 py-3 relative z-10 select-none flex group bg-slate-50 dark:bg-black/20">
           
-          {/* TIRA 1: Original */}
-          <div className="animate-marquee whitespace-nowrap flex items-center min-w-full group-hover:[animation-play-state:paused]">
-            {/* Pasamos los datos al componente externo */}
+          {/* TIRA 1: Usamos gap-16 (bastante espacio) para que no se encimen */}
+          <div className="animate-marquee whitespace-nowrap flex items-center gap-16 pr-16 min-w-full group-hover:[animation-play-state:paused]">
             <TickerItems data={tickerData} onItemClick={handleTickerClick} />
           </div>
 
-          {/* TIRA 2: Clon (para el bucle infinito sin huecos) */}
-          <div className="animate-marquee whitespace-nowrap flex items-center min-w-full group-hover:[animation-play-state:paused]" aria-hidden="true">
+          {/* TIRA 2: Clon con el mismo gap */}
+          <div className="animate-marquee whitespace-nowrap flex items-center gap-16 pr-16 min-w-full group-hover:[animation-play-state:paused]" aria-hidden="true">
             <TickerItems data={tickerData} onItemClick={handleTickerClick} />
           </div>
 
