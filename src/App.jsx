@@ -200,6 +200,8 @@ function App() {
     fetchData(currency, 1, ""); 
   };
 
+  // ... (Toda la lógica de imports y funciones arriba se queda IGUAL)
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-white font-sans flex flex-col items-center relative overflow-x-hidden transition-colors duration-300">
       
@@ -209,6 +211,7 @@ function App() {
       </div>
 
       <Header 
+        coins={coins} // 👈 ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE! Pasamos las monedas
         trending={trending}
         handleTickerClick={handleTickerClick}
         handleReset={handleReset}
@@ -230,7 +233,6 @@ function App() {
         searchTerm={searchTerm}
       />
 
-      {/* Padding superior fijo para respetar el header */}
       <main className="w-full max-w-7xl z-10 px-4 pt-48 md:pt-40 pb-12 flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={
@@ -262,7 +264,6 @@ function App() {
       </main>
 
       {!isSearching && !loading && !error && (
-         // 🔥 CORRECCIÓN AQUÍ: Paginación responsive (columna en móvil, fila en PC)
          <div className="w-full max-w-7xl z-10 px-4 pb-12 flex flex-col md:flex-row justify-between items-center gap-4 mx-auto mt-auto">
             <button 
               onClick={() => setPage(prev => Math.max(prev - 1, 1))} 
@@ -271,11 +272,9 @@ function App() {
             >
               ← Anterior
             </button>
-            
             <span className="text-slate-500 dark:text-gray-400 font-mono text-sm bg-white/50 dark:bg-gray-900/50 px-6 py-3 rounded-xl border border-slate-200 dark:border-white/5 whitespace-nowrap">
               Página <span className="text-blue-600 dark:text-cyan-400 font-bold ml-2">{page}</span>
             </span>
-            
             <button 
               onClick={() => setPage(prev => prev + 1)} 
               className="w-full md:w-auto px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-blue-600 hover:brightness-110 text-white text-sm shadow-lg shadow-blue-500/20 transition-all"

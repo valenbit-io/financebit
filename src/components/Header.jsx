@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Header = ({ 
+  coins, // Recibimos la lista completa
   trending, 
   handleTickerClick, 
   handleReset, 
@@ -28,31 +29,50 @@ const Header = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Usamos coins si existen, si no (carga inicial) usamos trending como respaldo
+  const tickerData = coins && coins.length > 0 ? coins : trending.map(t => ({
+      id: t.item.id,
+      symbol: t.item.symbol,
+      price_change_percentage_24h: t.item.data.price_change_percentage_24h.usd
+  }));
+
   return (
-    // Quitamos padding vertical al header para que la cinta pegue al borde
     <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 flex flex-col ${isScrolled ? 'bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md shadow-lg' : 'bg-white dark:bg-[#0f172a]'}`}>
       
-      {/* 📺 CINTA DE NOTICIAS (FULL WIDTH) */}
-      {/* Está fuera del contenedor principal para abarcar el 100% */}
-      {!isSearching && !showFavorites && (
-        <div className="w-full bg-blue-600 dark:bg-blue-900 overflow-hidden border-b border-blue-500/30 py-1.5 relative z-10">
-          <div className="animate-marquee whitespace-nowrap flex gap-12 items-center w-full">
-             {/* Duplicamos la lista para dar sensación de continuidad si es necesario, 
-                 o simplemente dejamos que corra */}
-             {trending.map(coin => (
-               <button key={coin.item.id} onClick={() => handleTickerClick(coin.item.id)} className="inline-flex items-center gap-2 group cursor-pointer transition-opacity hover:opacity-80">
-                  <span className="text-white/80 font-bold text-xs uppercase tracking-wider">{coin.item.symbol}</span>
-                  <span className={`text-xs font-mono font-bold ${coin.item.data.price_change_percentage_24h.usd > 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
-                    {coin.item.data.price_change_percentage_24h.usd > 0 ? '▲' : '▼'}
-                    {Math.abs(coin.item.data.price_change_percentage_24h.usd).toFixed(2)}%
-                  </span>
-               </button>
-             ))}
+      {/* 📺 CINTA DE PRECIOS (FULL WIDTH + PAUSA + MISMO COLOR) */}
+      {!isSearching && !showFavorites && tickerData.length > 0 && (
+        <div className="w-full overflow-hidden border-b border-slate-200 dark:border-white/5 py-2 relative z-10 select-none">
+          {/* hover:[animation-play-state:paused] detiene la cinta al poner el mouse */}
+          <div className="animate-marquee whitespace-nowrap flex gap-8 items-center w-max hover:[animation-play-state:paused]">
+             
+             {/* Renderizamos la lista DOS veces para crear el efecto de bucle infinito sin espacios vacíos */}
+             {[...tickerData, ...tickerData].map((coin, index) => {
+               // Normalizamos datos (por si viene de trending o de coins normal)
+               const change = typeof coin.price_change_percentage_24h === 'number' 
+                  ? coin.price_change_percentage_24h 
+                  : 0;
+               
+               return (
+                 <button 
+                    key={`${coin.id}-${index}`} 
+                    onClick={() => handleTickerClick(coin.id)} 
+                    className="inline-flex items-center gap-2 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+                 >
+                    <span className="text-slate-700 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">
+                      {coin.symbol}
+                    </span>
+                    <span className={`text-xs font-mono font-bold ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {change > 0 ? '▲' : '▼'}
+                      {Math.abs(change).toFixed(2)}%
+                    </span>
+                 </button>
+               );
+             })}
           </div>
         </div>
       )}
 
-      {/* BARRA DE NAVEGACIÓN (Centrada y contenida) */}
+      {/* BARRA DE NAVEGACIÓN */}
       <div className="w-full max-w-7xl mx-auto px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
           

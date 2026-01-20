@@ -7,17 +7,16 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
-      // 👇 AGREGA ESTA SECCIÓN DE KEYFRAMES Y ANIMATION
       animation: {
-        marquee: 'marquee 25s linear infinite',
+        // Ajustamos a 120s para que la lista larga pase suavemente
+        marquee: 'marquee 120s linear infinite',
       },
       keyframes: {
         marquee: {
-          '0%': { transform: 'translateX(100%)' }, // Empieza fuera a la derecha
-          '100%': { transform: 'translateX(-100%)' }, // Termina fuera a la izquierda
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
         }
       }
-      // 👆 HASTA AQUÍ
     },
   },
   plugins: [],
