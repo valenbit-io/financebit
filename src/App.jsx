@@ -214,7 +214,7 @@ function App() {
   };
 
   const toggleWatchlist = (e, coinId) => {
-    e.stopPropagation(); 
+    if (e && e.stopPropagation) e.stopPropagation();
     setWatchlist(prev => {
       if (prev.includes(coinId)) return prev.filter(id => id !== coinId); 
       return [...prev, coinId]; 
