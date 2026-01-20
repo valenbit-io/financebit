@@ -10,7 +10,7 @@ function App() {
   const navigate = useNavigate();
   
   const [coins, setCoins] = useState([]);
-  const [tickerCoins, setTickerCoins] = useState([]); // Lista para el Header
+  const [tickerCoins, setTickerCoins] = useState([]); 
   const [heroCoins, setHeroCoins] = useState([]);
   const [trending, setTrending] = useState([]);
   
@@ -75,10 +75,10 @@ function App() {
     fetchTrending();
   }, []);
 
-  // 👇 CAMBIO AQUÍ: Pedimos 100 monedas para más variedad y colores
+  // 👇 LOGICA DE EQUILIBRIO VISUAL (Intercalado Verde/Rojo)
   useEffect(() => {
     const fetchTickerData = async () => {
-      const cacheKey = `ticker_top_100_${currency}`;
+      const cacheKey = `ticker_top_100_balanced_${currency}`;
       const cached = localStorage.getItem(cacheKey);
       
       if (cached) {
@@ -90,12 +90,26 @@ function App() {
       }
 
       try {
-        // per_page=100
         const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`);
         if (!res.ok) return;
         const data = await res.json();
-        setTickerCoins(data);
-        localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+        
+        // --- INICIO ALGORITMO DE MEZCLA ---
+        const greens = data.filter(c => c.price_change_percentage_24h >= 0);
+        const reds = data.filter(c => c.price_change_percentage_24h < 0);
+        
+        const balancedList = [];
+        const maxLength = Math.max(greens.length, reds.length);
+
+        // Intercalamos: Una verde, una roja, una verde, una roja...
+        for (let i = 0; i < maxLength; i++) {
+          if (greens[i]) balancedList.push(greens[i]);
+          if (reds[i]) balancedList.push(reds[i]);
+        }
+        // --- FIN ALGORITMO ---
+
+        setTickerCoins(balancedList);
+        localStorage.setItem(cacheKey, JSON.stringify({ data: balancedList, timestamp: Date.now() }));
       } catch (e) {
         console.error("Error cargando ticker:", e);
       }
