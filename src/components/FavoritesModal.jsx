@@ -20,14 +20,31 @@ const FavoritesModal = ({
       }
 
       setLoading(true);
+      
+      const cacheKey = `fav_coins_${currency}_${watchlist.sort().join('_')}`;
+      const cached = localStorage.getItem(cacheKey);
+
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < 2 * 60 * 1000) { // 2 minutes cache
+          setFavCoins(data);
+          setLoading(false);
+          return;
+        }
+      }
+
       try {
         const res = await fetch(
           `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${watchlist.join(',')}&order=market_cap_desc`
         );
         const data = await res.json();
         setFavCoins(data);
+        localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
       } catch (error) {
         console.error("Error cargando favoritos", error);
+        if (cached) {
+          setFavCoins(JSON.parse(cached).data);
+        }
       } finally {
         setLoading(false);
       }
