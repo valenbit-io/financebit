@@ -5,6 +5,8 @@ import Header from './components/Header';
 import Home from './pages/Home';
 import CoinPage from './pages/CoinPage';
 import FavoritesModal from './components/FavoritesModal';
+import NotFound from './pages/NotFound';
+import Footer from './components/Footer';
 import { useCache } from './hooks/useCache';
 
 const ScrollToTop = () => {
@@ -297,6 +299,7 @@ function App() {
               toggleWatchlist={toggleWatchlist}
             />
           } />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
@@ -320,6 +323,8 @@ function App() {
             </button>
          </div>
       )}
+
+      <Footer />
 
       {showFavorites && (
         <FavoritesModal 
