@@ -117,16 +117,16 @@ function App() {
 
   // Hero Logic
   useEffect(() => {
-    if (coins.length > 0) {
+    if (tickerCoins.length > 0) {
       const shuffleCoins = () => {
-        const shuffled = [...coins].sort(() => 0.5 - Math.random());
+        const shuffled = [...tickerCoins].sort(() => 0.5 - Math.random());
         setHeroCoins(shuffled.slice(0, 3));
       };
       shuffleCoins();
       const intervalId = setInterval(shuffleCoins, 4000);
       return () => clearInterval(intervalId);
     }
-  }, [coins]);
+  }, [tickerCoins]);
 
   // Main Table Fetch
   const fetchData = useCallback(async (currCurrency = currency, currPage = page, term = searchTerm) => {
