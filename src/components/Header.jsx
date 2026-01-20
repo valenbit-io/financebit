@@ -98,7 +98,9 @@ const Header = ({
               }`}
             >
               <span className="text-lg">★</span>
+              {/* ESTA LÍNEA ES LA CLAVE PARA QUE NO SE SALGA EN MÓVIL */}
               <span className="hidden md:block text-sm">Favoritos</span>
+              
               {watchlist.length > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] text-white font-bold animate-bounce">
                   {watchlist.length}
