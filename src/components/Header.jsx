@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 // 1. Componente externo
 const TickerItems = ({ data, onItemClick }) => (
@@ -35,8 +36,6 @@ const Header = ({
   trending, 
   handleTickerClick, 
   handleReset, 
-  darkMode, 
-  setDarkMode, 
   currency, 
   setCurrency,
   watchlist,
@@ -49,6 +48,7 @@ const Header = ({
   searchTerm
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { darkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -143,7 +143,7 @@ const Header = ({
             </button>
 
             <button 
-              onClick={() => setDarkMode(!darkMode)} 
+              onClick={toggleTheme} 
               className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-yellow-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
             >
               {darkMode ? '☀️' : '🌙'}

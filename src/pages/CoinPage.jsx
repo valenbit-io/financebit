@@ -2,19 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useCache } from '../hooks/useCache';
+import { useTheme } from '../context/ThemeContext';
+import { calculateSmartTarget } from '../utils/cryptoUtils';
 
-// Función auxiliar fuera del componente para optimización
-const calculateSmartTarget = (price) => {
-  const rawTarget = price * 1.5; 
-  let decimals = 2;
-  if (price < 1) decimals = 4;
-  if (price < 0.01) decimals = 8;
-  return parseFloat(rawTarget.toFixed(decimals));
-};
-
-const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode }) => {
+const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist }) => {
   const { id } = useParams(); 
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
 
   const [coin, setCoin] = useState(null);
   const [loading, setLoading] = useState(true);

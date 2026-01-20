@@ -37,13 +37,6 @@ function App() {
 
   const { getCache, setCache } = useCache();
 
-  const [darkMode, setDarkMode] = useState(() => {
-    if (localStorage.getItem('theme')) {
-      return localStorage.getItem('theme') === 'dark';
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
   const [watchlist, setWatchlist] = useState(() => {
     const saved = localStorage.getItem('watchlist');
     return saved ? JSON.parse(saved) : [];
@@ -52,16 +45,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem('watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [darkMode]);
 
   // Tendencias
   useEffect(() => {
@@ -283,8 +266,6 @@ function App() {
         trending={trending}
         handleTickerClick={handleTickerClick}
         handleReset={handleReset}
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
         currency={currency}
         setCurrency={(newCurrency) => {
             setCoins([]); 
@@ -325,7 +306,6 @@ function App() {
               currency={currency}
               watchlist={watchlist}
               toggleWatchlist={toggleWatchlist}
-              darkMode={darkMode}
             />
           } />
         </Routes>
