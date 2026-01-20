@@ -152,7 +152,7 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
 
   return (
     // Sin padding top extra, hereda el de App.jsx
-    <div className="w-full max-w-7xl mx-auto px-4 pt-0 pb-12 animate-fadeIn">
+    <div className="w-full animate-fadeIn">
       <button 
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center gap-2 text-slate-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-cyan-400 transition-colors font-bold"

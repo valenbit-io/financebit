@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 import Header from './components/Header';
 import Home from './pages/Home';
@@ -9,6 +9,7 @@ import { useCache } from './hooks/useCache';
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [coins, setCoins] = useState([]);
   const [tickerCoins, setTickerCoins] = useState([]); 
@@ -303,7 +304,7 @@ function App() {
         </Routes>
       </main>
 
-      {!isSearching && !loading && !error && (
+      {!isSearching && !loading && !error && location.pathname === '/' && (
          <div className="w-full max-w-7xl z-10 px-4 pb-12 flex flex-col md:flex-row justify-between items-center gap-4 mx-auto mt-auto">
             <button 
               onClick={() => setPage(prev => Math.max(prev - 1, 1))} 
