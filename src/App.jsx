@@ -243,6 +243,9 @@ function App() {
     fetchData(currency, 1, ""); 
   };
 
+  const hasTickerData = tickerCoins.length > 0 || trending.length > 0;
+  const isTickerVisible = !isSearching && !showFavorites && hasTickerData;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-white font-sans flex flex-col items-center relative overflow-x-hidden transition-colors duration-300">
       
@@ -274,7 +277,7 @@ function App() {
         searchTerm={searchTerm}
       />
 
-      <main className="w-full max-w-7xl z-10 px-4 pt-48 md:pt-40 pb-12 flex-1 flex flex-col">
+      <main className={`w-full max-w-7xl z-10 px-4 pb-12 flex-1 flex flex-col ${isTickerVisible ? 'pt-48 md:pt-40' : 'pt-32 md:pt-24'}`}>
         <Routes>
           <Route path="/" element={
             <Home 
