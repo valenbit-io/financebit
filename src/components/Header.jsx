@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// 1. Componente externo para evitar error de render
+// 1. Componente externo
 const TickerItems = ({ data, onItemClick }) => (
   <>
     {data.map((coin, index) => {
@@ -12,15 +12,15 @@ const TickerItems = ({ data, onItemClick }) => (
          <button 
             key={`${coin.id}-${index}`} 
             onClick={() => onItemClick(coin.id)} 
-            // 🔥 CORRECCIÓN: flex-shrink-0 (no aplastar), gap visual grande, texto más grande
-            className="flex-shrink-0 inline-flex items-center gap-2 group cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
+            // 🔥 CAMBIO 1: mr-12 (margen derecho obligatorio) y w-auto para que no se aplaste
+            className="flex-shrink-0 w-auto inline-flex items-center gap-2 mr-16 group cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
          >
-            {/* Nombre un poco más grande (text-sm) */}
-            <span className="text-slate-700 dark:text-slate-300 font-bold text-sm uppercase tracking-wider">
+            {/* Nombre (text-sm) */}
+            <span className="text-slate-700 dark:text-slate-300 font-bold text-sm uppercase tracking-wider whitespace-nowrap">
               {coin.symbol}
             </span>
-            {/* Porcentaje más grande (text-sm o text-base) */}
-            <span className={`text-sm font-mono font-bold ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            {/* Porcentaje */}
+            <span className={`text-sm font-mono font-bold whitespace-nowrap ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
               {change > 0 ? '▲' : '▼'}
               {Math.abs(change).toFixed(2)}%
             </span>
@@ -71,13 +71,13 @@ const Header = ({
       {!isSearching && !showFavorites && tickerData.length > 0 && (
         <div className="w-full overflow-hidden border-b border-slate-200 dark:border-white/5 py-3 relative z-10 select-none flex group bg-slate-50 dark:bg-black/20">
           
-          {/* TIRA 1: Usamos gap-16 (bastante espacio) para que no se encimen */}
-          <div className="animate-marquee whitespace-nowrap flex items-center gap-16 pr-16 min-w-full group-hover:[animation-play-state:paused]">
+          {/* 🔥 CAMBIO 2: Quitamos 'min-w-full' y gap del padre. Usamos 'w-max' para que crezca libremente */}
+          <div className="animate-marquee whitespace-nowrap flex items-center w-max group-hover:[animation-play-state:paused]">
             <TickerItems data={tickerData} onItemClick={handleTickerClick} />
           </div>
 
-          {/* TIRA 2: Clon con el mismo gap */}
-          <div className="animate-marquee whitespace-nowrap flex items-center gap-16 pr-16 min-w-full group-hover:[animation-play-state:paused]" aria-hidden="true">
+          {/* Clon para bucle infinito */}
+          <div className="animate-marquee whitespace-nowrap flex items-center w-max group-hover:[animation-play-state:paused]" aria-hidden="true">
             <TickerItems data={tickerData} onItemClick={handleTickerClick} />
           </div>
 
