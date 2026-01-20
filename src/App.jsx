@@ -7,6 +7,15 @@ import CoinPage from './pages/CoinPage';
 import FavoritesModal from './components/FavoritesModal';
 import { useCache } from './hooks/useCache';
 
+// Componente para asegurar que la navegación inicie desde arriba
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -262,6 +271,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-white font-sans flex flex-col items-center relative overflow-x-hidden transition-colors duration-300">
+      <ScrollToTop />
       
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/20 dark:bg-blue-600/20 rounded-full blur-[120px]"></div>

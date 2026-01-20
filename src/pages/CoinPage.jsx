@@ -3,12 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useCache } from '../hooks/useCache';
 
+// Función auxiliar fuera del componente para optimización
+const calculateSmartTarget = (price) => {
+  const rawTarget = price * 1.5; 
+  let decimals = 2;
+  if (price < 1) decimals = 4;
+  if (price < 0.01) decimals = 8;
+  return parseFloat(rawTarget.toFixed(decimals));
+};
+
 const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode }) => {
   const { id } = useParams(); 
   const navigate = useNavigate();
 
   const [coin, setCoin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   const [amount, setAmount] = useState(100); 
   const [targetPrice, setTargetPrice] = useState(0); 
@@ -22,14 +32,6 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
   const [chartLoading, setChartLoading] = useState(true);
 
   const { getCache, setCache } = useCache();
-
-  const calculateSmartTarget = (price) => {
-    const rawTarget = price * 1.5; 
-    let decimals = 2;
-    if (price < 1) decimals = 4;
-    if (price < 0.01) decimals = 8;
-    return parseFloat(rawTarget.toFixed(decimals));
-  };
 
   const formatInputDisplay = (val, isFocused) => {
     if (isFocused) return val;
@@ -51,9 +53,18 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
     }
   };
 
+  // Efecto para título dinámico en la pestaña del navegador
+  useEffect(() => {
+    if (coin) {
+      document.title = `${coin.name} (${coin.symbol.toUpperCase()}) | FinanceBit`;
+    }
+    return () => { document.title = 'FinanceBit - Crypto Tracker'; };
+  }, [coin]);
+
   useEffect(() => {
     const fetchCoinData = async () => {
       setLoading(true);
+      setError(null);
       const cacheKey = `coin_detail_${id}_${currency}`;
       
       const cachedData = getCache(cacheKey, 5);
@@ -85,6 +96,8 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
             setCoin(staleData);
             setCurrentPrice(staleData.current_price);
             setTargetPrice(calculateSmartTarget(staleData.current_price));
+        } else {
+            setError("No se pudo cargar la información de la moneda.");
         }
       } finally {
         setLoading(false);
@@ -117,6 +130,21 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
     };
     fetchChartData();
   }, [id, days, currency, getCache, setCache]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center pt-20 gap-4 animate-fadeIn">
+        <div className="text-6xl">😕</div>
+        <h2 className="text-2xl font-bold text-slate-700 dark:text-white text-center px-4">{error}</h2>
+        <button 
+          onClick={() => navigate('/')}
+          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors shadow-lg"
+        >
+          Volver al Inicio
+        </button>
+      </div>
+    );
+  }
 
   if (loading || !coin) {
     return (
@@ -186,7 +214,7 @@ const CoinPage = ({ formatPrice, currency, watchlist, toggleWatchlist, darkMode 
             </p>
             <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold mt-2 ${coin.price_change_percentage_24h > 0 ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400'}`}>
                {coin.price_change_percentage_24h > 0 ? '▲' : '▼'}
-               {Math.abs(coin.price_change_percentage_24h?.toFixed(2))}% (24h)
+               {Math.abs(coin.price_change_percentage_24h || 0).toFixed(2)}% (24h)
             </div>
           </div>
         </div>
