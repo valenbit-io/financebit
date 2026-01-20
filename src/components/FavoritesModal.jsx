@@ -15,9 +15,11 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
       }
 
       setLoading(true);
+      // Crear una clave de caché única basada en los IDs y la moneda
       const ids = watchlist.join(',');
       const cacheKey = `fav_coins_${ids}_${currency}`;
 
+      // 1. Intentar obtener del caché primero (5 minutos de validez)
       const cachedData = getCache(cacheKey, 5);
       if (cachedData) {
         setFavCoins(cachedData);
@@ -25,6 +27,7 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
         return;
       }
 
+      // 2. Si no hay caché, consultar a la API
       try {
         const res = await fetch(
           `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${ids}&order=market_cap_desc&sparkline=false`
@@ -44,6 +47,7 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
     fetchFavorites();
   }, [watchlist, currency, getCache, setCache]);
 
+  // Cerrar con la tecla ESC
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') onClose();
@@ -58,6 +62,7 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
         className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[80vh]"
         onClick={e => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <span className="text-yellow-500">★</span> Favoritos
@@ -67,6 +72,7 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
           </button>
         </div>
 
+        {/* Content */}
         <div className="overflow-y-auto p-6 custom-scrollbar">
           {loading ? (
             <div className="flex justify-center py-10">
