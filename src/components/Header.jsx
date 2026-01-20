@@ -29,32 +29,34 @@ const Header = ({
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}>
-      <div className="max-w-7xl mx-auto px-4">
-        
-        {/* Ticker de Tendencias (Diseño Limpio) */}
-        {!isSearching && !showFavorites && (
-          <div className="w-full overflow-hidden mb-4">
-            <div className="animate-marquee whitespace-nowrap flex gap-8 items-center">
-               {/* Se eliminó la etiqueta "Tendencias" para que solo fluyan las monedas */}
-               {trending.map(coin => (
-                 <button key={coin.item.id} onClick={() => handleTickerClick(coin.item.id)} className="inline-flex items-center gap-2 group cursor-pointer opacity-80 hover:opacity-100 transition-opacity">
-                    <img src={coin.item.thumb} alt={coin.item.name} className="w-5 h-5 rounded-full" />
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-cyan-400">{coin.item.symbol}</span>
-                    <span className={`text-xs font-mono ${coin.item.data.price_change_percentage_24h.usd > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {coin.item.data.price_change_percentage_24h.usd > 0 ? '+' : ''}
-                      {coin.item.data.price_change_percentage_24h.usd.toFixed(2)}%
-                    </span>
-                 </button>
-               ))}
-            </div>
+    // Quitamos padding vertical al header para que la cinta pegue al borde
+    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 flex flex-col ${isScrolled ? 'bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md shadow-lg' : 'bg-white dark:bg-[#0f172a]'}`}>
+      
+      {/* 📺 CINTA DE NOTICIAS (FULL WIDTH) */}
+      {/* Está fuera del contenedor principal para abarcar el 100% */}
+      {!isSearching && !showFavorites && (
+        <div className="w-full bg-blue-600 dark:bg-blue-900 overflow-hidden border-b border-blue-500/30 py-1.5 relative z-10">
+          <div className="animate-marquee whitespace-nowrap flex gap-12 items-center w-full">
+             {/* Duplicamos la lista para dar sensación de continuidad si es necesario, 
+                 o simplemente dejamos que corra */}
+             {trending.map(coin => (
+               <button key={coin.item.id} onClick={() => handleTickerClick(coin.item.id)} className="inline-flex items-center gap-2 group cursor-pointer transition-opacity hover:opacity-80">
+                  <span className="text-white/80 font-bold text-xs uppercase tracking-wider">{coin.item.symbol}</span>
+                  <span className={`text-xs font-mono font-bold ${coin.item.data.price_change_percentage_24h.usd > 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                    {coin.item.data.price_change_percentage_24h.usd > 0 ? '▲' : '▼'}
+                    {Math.abs(coin.item.data.price_change_percentage_24h.usd).toFixed(2)}%
+                  </span>
+               </button>
+             ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Barra Principal */}
+      {/* BARRA DE NAVEGACIÓN (Centrada y contenida) */}
+      <div className="w-full max-w-7xl mx-auto px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
           
-          {/* Logo (Modo seguro sin imagen para Vercel) */}
+          {/* Logo */}
           <Link to="/" onClick={handleReset} className="flex items-center gap-2 group shrink-0">
             <span className="text-2xl md:text-3xl filter drop-shadow-sm group-hover:scale-110 transition-transform">💎</span>
             <h1 className="text-xl md:text-2xl font-black tracking-tighter text-slate-800 dark:text-white">
