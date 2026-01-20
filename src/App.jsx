@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import CoinPage from './pages/CoinPage';
 import FavoritesModal from './components/FavoritesModal';
 import NotFound from './pages/NotFound.jsx';
-import Footer from './components/Footer';
+import Footer from './components/Footer.jsx';
 import { useCache } from './hooks/useCache';
 
 const ScrollToTop = () => {
