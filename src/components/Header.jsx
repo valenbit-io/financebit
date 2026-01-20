@@ -97,7 +97,7 @@ const Header = ({
           </Link>
 
           {/* Buscador */}
-          <div className="flex-1 max-w-md relative">
+          <div className="order-last md:order-none w-full md:w-auto md:flex-1 max-w-md relative mt-2 md:mt-0">
             <form onSubmit={handleSearch} className="relative group">
               <input 
                 type="text" 
