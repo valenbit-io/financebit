@@ -8,8 +8,8 @@ export default {
   theme: {
     extend: {
       animation: {
-        // Ajustamos a 120s para que la lista larga pase suavemente
-        marquee: 'marquee 120s linear infinite',
+        // 👇 CAMBIO AQUÍ: 30s es una velocidad estándar para noticias
+        marquee: 'marquee 30s linear infinite',
       },
       keyframes: {
         marquee: {

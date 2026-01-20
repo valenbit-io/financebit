@@ -1,8 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+// 1. Definimos el componente auxiliar AFUERA para evitar el error de render
+const TickerItems = ({ data, onItemClick }) => (
+  <>
+    {data.map((coin, index) => {
+       const change = typeof coin.price_change_percentage_24h === 'number' 
+          ? coin.price_change_percentage_24h 
+          : 0;
+       return (
+         <button 
+            key={`${coin.id}-${index}`} 
+            onClick={() => onItemClick(coin.id)} 
+            className="inline-flex items-center gap-2 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity mx-6"
+         >
+            <span className="text-slate-700 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">
+              {coin.symbol}
+            </span>
+            <span className={`text-xs font-mono font-bold ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+              {change > 0 ? '▲' : '▼'}
+              {Math.abs(change).toFixed(2)}%
+            </span>
+         </button>
+       );
+    })}
+  </>
+);
+
 const Header = ({ 
-  coins, // Recibimos la lista completa
+  coins, 
   trending, 
   handleTickerClick, 
   handleReset, 
@@ -29,7 +55,7 @@ const Header = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Usamos coins si existen, si no (carga inicial) usamos trending como respaldo
+  // Preparamos los datos
   const tickerData = coins && coins.length > 0 ? coins : trending.map(t => ({
       id: t.item.id,
       symbol: t.item.symbol,
@@ -39,36 +65,21 @@ const Header = ({
   return (
     <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 flex flex-col ${isScrolled ? 'bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md shadow-lg' : 'bg-white dark:bg-[#0f172a]'}`}>
       
-      {/* 📺 CINTA DE PRECIOS (FULL WIDTH + PAUSA + MISMO COLOR) */}
+      {/* 📺 CINTA DE PRECIOS INFINITA (Técnica Twin-Loop) */}
       {!isSearching && !showFavorites && tickerData.length > 0 && (
-        <div className="w-full overflow-hidden border-b border-slate-200 dark:border-white/5 py-2 relative z-10 select-none">
-          {/* hover:[animation-play-state:paused] detiene la cinta al poner el mouse */}
-          <div className="animate-marquee whitespace-nowrap flex gap-8 items-center w-max hover:[animation-play-state:paused]">
-             
-             {/* Renderizamos la lista DOS veces para crear el efecto de bucle infinito sin espacios vacíos */}
-             {[...tickerData, ...tickerData].map((coin, index) => {
-               // Normalizamos datos (por si viene de trending o de coins normal)
-               const change = typeof coin.price_change_percentage_24h === 'number' 
-                  ? coin.price_change_percentage_24h 
-                  : 0;
-               
-               return (
-                 <button 
-                    key={`${coin.id}-${index}`} 
-                    onClick={() => handleTickerClick(coin.id)} 
-                    className="inline-flex items-center gap-2 group cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
-                 >
-                    <span className="text-slate-700 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">
-                      {coin.symbol}
-                    </span>
-                    <span className={`text-xs font-mono font-bold ${change > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {change > 0 ? '▲' : '▼'}
-                      {Math.abs(change).toFixed(2)}%
-                    </span>
-                 </button>
-               );
-             })}
+        <div className="w-full overflow-hidden border-b border-slate-200 dark:border-white/5 py-2 relative z-10 select-none flex group">
+          
+          {/* TIRA 1: Original */}
+          <div className="animate-marquee whitespace-nowrap flex items-center min-w-full group-hover:[animation-play-state:paused]">
+            {/* Pasamos los datos al componente externo */}
+            <TickerItems data={tickerData} onItemClick={handleTickerClick} />
           </div>
+
+          {/* TIRA 2: Clon (para el bucle infinito sin huecos) */}
+          <div className="animate-marquee whitespace-nowrap flex items-center min-w-full group-hover:[animation-play-state:paused]" aria-hidden="true">
+            <TickerItems data={tickerData} onItemClick={handleTickerClick} />
+          </div>
+
         </div>
       )}
 
