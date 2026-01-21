@@ -5,6 +5,7 @@ import { CoinGeckoService } from '../services/api';
 const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatPrice, onNavigate }) => {
   const [favCoins, setFavCoins] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { getCache, setCache } = useCache();
 
   useEffect(() => {
@@ -16,6 +17,7 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
       }
 
       setLoading(true);
+      setError(null);
       // Crear una clave de caché única basada en los IDs y la moneda
       const ids = watchlist.join(',');
       const cacheKey = `fav_coins_${ids}_${currency}`;
@@ -35,6 +37,7 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
         setCache(cacheKey, data);
       } catch (error) {
         console.error("Error cargando favoritos:", error);
+        setError("Hubo un problema al cargar tus favoritos. Intenta de nuevo.");
       } finally {
         setLoading(false);
       }
@@ -73,6 +76,11 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
           {loading ? (
             <div className="flex justify-center py-10">
               <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-10 text-rose-500">
+              <p className="text-4xl mb-4">⚠️</p>
+              <p>{error}</p>
             </div>
           ) : favCoins.length === 0 ? (
             <div className="text-center py-10 text-slate-500 dark:text-slate-400">
