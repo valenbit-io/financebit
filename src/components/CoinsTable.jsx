@@ -1,7 +1,9 @@
 import React from 'react';
 import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
+import { useCrypto } from '../context/CryptoContext';
 
-const CoinsTable = ({ coins, loading, error, currency, watchlist, toggleWatchlist, formatPrice, setSelectedCoin, fetchData, showFavorites, searchTerm }) => {
+const CoinsTable = ({ coins, loading, error, watchlist, toggleWatchlist, formatPrice, setSelectedCoin, fetchData, showFavorites, searchTerm }) => {
+  const { currency } = useCrypto();
   
   if (loading) {
     return (

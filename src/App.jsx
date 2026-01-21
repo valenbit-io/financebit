@@ -8,6 +8,7 @@ import FavoritesModal from './components/FavoritesModal';
 import NotFound from './pages/NotFound.jsx';
 import Footer from './components/Footer.jsx';
 import { useCache } from './hooks/useCache';
+import { useCrypto } from './context/CryptoContext';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -33,7 +34,7 @@ function App() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [currency, setCurrency] = useState('usd');
+  const { currency, setCurrency } = useCrypto();
   const [showFavorites, setShowFavorites] = useState(false);
 
   const { getCache, setCache } = useCache();
