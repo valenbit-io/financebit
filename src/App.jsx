@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound.jsx';
 import Footer from './components/Footer.jsx';
 import { useCache } from './hooks/useCache';
 import { useCrypto } from './context/CryptoContext';
+import { CoinGeckoService } from './services/api';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -58,9 +59,7 @@ function App() {
       }
 
       try {
-        const res = await fetch('https://api.coingecko.com/api/v3/search/trending');
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await CoinGeckoService.getTrending();
         setTrending(data.coins);
         setCache(cacheKey, data.coins);
       } catch (e) {
@@ -81,9 +80,8 @@ function App() {
       }
 
       try {
-        const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`);
-        if (!res.ok) return;
-        const data = await res.json();
+        // Solicitamos 100 monedas sin sparkline para el ticker
+        const data = await CoinGeckoService.getMarkets(currency, 1, 100, false);
         
         const greens = data.filter(c => c.price_change_percentage_24h >= 0);
         const reds = data.filter(c => c.price_change_percentage_24h < 0);
@@ -140,15 +138,14 @@ function App() {
     }
 
     try {
-      let url = "";
+      let data = [];
       if (term) {
         setIsSearching(true);
-        const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${term}`, { signal });
-        const searchData = await searchRes.json();
+        const searchData = await CoinGeckoService.searchCoins(term, { signal });
         const coinIds = searchData.coins.slice(0, 10).map(coin => coin.id).join(',');
         
         if (coinIds) {
-          url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currCurrency}&ids=${coinIds}&order=market_cap_desc&sparkline=true`;
+          data = await CoinGeckoService.getCoinsByIds(currCurrency, coinIds, true, { signal });
         } else {
           setCoins([]);
           setLoading(false);
@@ -156,14 +153,9 @@ function App() {
         }
       } else {
         setIsSearching(false);
-        url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currCurrency}&order=market_cap_desc&per_page=10&page=${currPage}&sparkline=true`;
+        data = await CoinGeckoService.getMarkets(currCurrency, currPage, 10, true, { signal });
       }
 
-      const res = await fetch(url, { signal });
-      if (res.status === 429) throw new Error("Rate limit exceeded. Please wait.");
-      if (!res.ok) throw new Error("Server error.");
-      
-      const data = await res.json();
       setCoins(data);
 
       if (!term) {

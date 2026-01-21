@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCache } from '../hooks/useCache';
+import { CoinGeckoService } from '../services/api';
 
 const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatPrice, onNavigate }) => {
   const [favCoins, setFavCoins] = useState([]);
@@ -29,14 +30,9 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
 
       // 2. Si no hay caché, consultar a la API
       try {
-        const res = await fetch(
-          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${ids}&order=market_cap_desc&sparkline=false`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setFavCoins(data);
-          setCache(cacheKey, data);
-        }
+        const data = await CoinGeckoService.getCoinsByIds(currency, ids, false);
+        setFavCoins(data);
+        setCache(cacheKey, data);
       } catch (error) {
         console.error("Error cargando favoritos:", error);
       } finally {
