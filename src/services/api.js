@@ -1,4 +1,4 @@
-const BASE_URL = "https://api.coingecko.com/api/v3";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://api.coingecko.com/api/v3";
 
 export const CoinGeckoService = {
   getTrending: async (options = {}) => {

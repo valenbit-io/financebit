@@ -10,6 +10,7 @@ import Footer from './components/Footer.jsx';
 import { useCache } from './hooks/useCache';
 import { useCrypto } from './context/CryptoContext';
 import { CoinGeckoService } from './services/api';
+import { HelmetProvider } from 'react-helmet-async';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -237,6 +238,7 @@ function App() {
   const isTickerVisible = !isSearching && !showFavorites && hasTickerData;
 
   return (
+    <HelmetProvider>
     <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-white font-sans flex flex-col items-center relative overflow-x-hidden transition-colors duration-300">
       <ScrollToTop />
       
@@ -332,6 +334,7 @@ function App() {
         />
       )}
     </div>
+    </HelmetProvider>
   );
 }
 

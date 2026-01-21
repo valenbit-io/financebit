@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { useCache } from '../hooks/useCache';
 import { CoinGeckoService } from '../services/api';
 
@@ -7,6 +8,7 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { getCache, setCache } = useCache();
+  const modalRef = useRef(null);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -46,18 +48,40 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
     fetchFavorites();
   }, [watchlist, currency, getCache, setCache]);
 
-  // Cerrar con la tecla ESC
+  // Cerrar con la tecla ESC y Atrapar el Foco (A11y)
   useEffect(() => {
-    const handleEsc = (e) => {
+    const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
+      
+      // Focus Trap
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else { // Tab
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      }
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
       <div 
+        ref={modalRef}
         className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[80vh]"
         onClick={e => e.stopPropagation()}
       >
@@ -126,6 +150,15 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
       </div>
     </div>
   );
+};
+
+FavoritesModal.propTypes = {
+  watchlist: PropTypes.arrayOf(PropTypes.string).isRequired,
+  currency: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+  toggleWatchlist: PropTypes.func.isRequired,
+  formatPrice: PropTypes.func.isRequired,
+  onNavigate: PropTypes.func.isRequired,
 };
 
 export default FavoritesModal;
