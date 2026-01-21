@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
@@ -142,6 +143,32 @@ const Header = ({
       </div>
     </header>
   );
+};
+
+TickerItems.propTypes = {
+  data: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    symbol: PropTypes.string.isRequired,
+    price_change_percentage_24h: PropTypes.number
+  })).isRequired,
+  onItemClick: PropTypes.func.isRequired
+};
+
+Header.propTypes = {
+  coins: PropTypes.array.isRequired,
+  trending: PropTypes.array.isRequired,
+  handleTickerClick: PropTypes.func.isRequired,
+  handleReset: PropTypes.func.isRequired,
+  currency: PropTypes.string.isRequired,
+  setCurrency: PropTypes.func.isRequired,
+  watchlist: PropTypes.arrayOf(PropTypes.string).isRequired,
+  showFavorites: PropTypes.bool.isRequired,
+  setShowFavorites: PropTypes.func.isRequired,
+  setSearchTerm: PropTypes.func.isRequired,
+  handleSearch: PropTypes.func.isRequired,
+  isSearching: PropTypes.bool.isRequired,
+  clearSearch: PropTypes.func.isRequired,
+  searchTerm: PropTypes.string.isRequired
 };
 
 export default Header;

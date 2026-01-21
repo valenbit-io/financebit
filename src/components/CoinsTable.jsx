@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 import { useCrypto } from '../context/CryptoContext';
 
@@ -138,6 +139,28 @@ const SparklineChart = ({ data, change }) => {
       </LineChart>
     </ResponsiveContainer>
   );
+};
+
+CoinsTable.propTypes = {
+  coins: PropTypes.array.isRequired,
+  loading: PropTypes.bool.isRequired,
+  error: PropTypes.string,
+  watchlist: PropTypes.arrayOf(PropTypes.string).isRequired,
+  toggleWatchlist: PropTypes.func.isRequired,
+  formatPrice: PropTypes.func.isRequired,
+  setSelectedCoin: PropTypes.func.isRequired,
+  fetchData: PropTypes.func.isRequired,
+  showFavorites: PropTypes.bool.isRequired,
+  searchTerm: PropTypes.string.isRequired
+};
+
+TableHead.propTypes = {
+  currency: PropTypes.string.isRequired
+};
+
+SparklineChart.propTypes = {
+  data: PropTypes.arrayOf(PropTypes.number),
+  change: PropTypes.number
 };
 
 export default CoinsTable;

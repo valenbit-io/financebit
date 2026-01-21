@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const HeroSection = ({ coins, formatPrice, setSelectedCoin, currency }) => (
   <div className="hidden md:grid grid-cols-3 gap-6 mb-10 animate-fadeIn">
@@ -41,5 +42,12 @@ const HeroSection = ({ coins, formatPrice, setSelectedCoin, currency }) => (
     ))}
   </div>
 );
+
+HeroSection.propTypes = {
+  coins: PropTypes.array.isRequired,
+  formatPrice: PropTypes.func.isRequired,
+  setSelectedCoin: PropTypes.func.isRequired,
+  currency: PropTypes.string.isRequired
+};
 
 export default HeroSection;
