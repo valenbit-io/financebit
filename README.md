@@ -2,7 +2,7 @@
 
 **FinanceBit** es una aplicación web moderna y reactiva para el seguimiento de criptomonedas en tiempo real. Desarrollada por **ValenBit**, esta herramienta ofrece una experiencia de usuario fluida para visualizar precios, tendencias de mercado y gestionar tus activos favoritos.
 
-![FinanceBit Preview](/public/financebit.png)
+![FinanceBit Preview](/public/financebit.jpg)
 
 ## 🚀 Características Destacadas
 
