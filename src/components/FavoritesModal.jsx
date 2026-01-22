@@ -20,11 +20,9 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
 
       setLoading(true);
       setError(null);
-      // Crear una clave de caché única basada en los IDs y la moneda
       const ids = watchlist.join(',');
       const cacheKey = `fav_coins_${ids}_${currency}`;
 
-      // 1. Intentar obtener del caché primero (5 minutos de validez)
       const cachedData = getCache(cacheKey, 5);
       if (cachedData) {
         setFavCoins(cachedData);
@@ -32,7 +30,6 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
         return;
       }
 
-      // 2. Si no hay caché, consultar a la API
       try {
         const data = await CoinGeckoService.getCoinsByIds(currency, ids, false);
         setFavCoins(data);
@@ -48,12 +45,10 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
     fetchFavorites();
   }, [watchlist, currency, getCache, setCache]);
 
-  // Cerrar con la tecla ESC y Atrapar el Foco (A11y)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
       
-      // Focus Trap
       if (e.key === 'Tab' && modalRef.current) {
         const focusableElements = modalRef.current.querySelectorAll(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -61,12 +56,12 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
 
-        if (e.shiftKey) { // Shift + Tab
+        if (e.shiftKey) {
           if (document.activeElement === firstElement) {
             lastElement.focus();
             e.preventDefault();
           }
-        } else { // Tab
+        } else {
           if (document.activeElement === lastElement) {
             firstElement.focus();
             e.preventDefault();
@@ -85,7 +80,6 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
         className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[80vh]"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <span className="text-yellow-500">★</span> Favoritos
@@ -95,7 +89,6 @@ const FavoritesModal = ({ watchlist, currency, onClose, toggleWatchlist, formatP
           </button>
         </div>
 
-        {/* Content */}
         <div className="overflow-y-auto p-6 custom-scrollbar">
           {loading ? (
             <div className="flex justify-center py-10">

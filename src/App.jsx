@@ -81,7 +81,6 @@ function App() {
       }
 
       try {
-        // Solicitamos 100 monedas sin sparkline para el ticker
         const data = await CoinGeckoService.getMarkets(currency, 1, 100, false);
         
         const greens = data.filter(c => c.price_change_percentage_24h >= 0);
